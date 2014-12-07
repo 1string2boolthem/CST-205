@@ -1,1 +1,1 @@
-printNow("TEST")
+printNow("TEST ME!")
