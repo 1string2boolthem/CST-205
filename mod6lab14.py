@@ -24,7 +24,7 @@ def printHeadlines():
     block = block.replace("&#8230;", "...")
     block = block.replace('â', '\'')
     block = block.replace('™', '')
-    block = block.replace(' ', '')
+    block = block.replace(chr(128), '')
     printNow(block)
 def greenEggs():
   file = open(pickAFile(), "rt")
