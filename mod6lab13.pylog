@@ -3,6 +3,7 @@
 <menu_button time="Mon Dec 08 19:12:17 PST 2014">Save Program</menu_button>
 <file_saved time="Mon Dec 08 19:12:59 PST 2014">/Users/sgail/Desktop/CST-205/mod6lab13.py</file_saved>
 </file_created>
+<<<<<<< HEAD
 <menu_button time="Mon Dec 08 19:22:34 PST 2014">Undo</menu_button>
 <menu_button time="Mon Dec 08 19:22:35 PST 2014">Undo</menu_button>
 <menu_button time="Mon Dec 08 19:22:42 PST 2014">Save Program</menu_button>
@@ -126,3 +127,5 @@
 <menu_button time="Mon Dec 08 20:45:14 PST 2014">Save Program</menu_button>
 <file_saved time="Mon Dec 08 20:45:14 PST 2014">/Users/sgail/Desktop/CST-205/mod6lab13.py</file_saved>
 </file_created>
+=======
+>>>>>>> FETCH_HEAD
