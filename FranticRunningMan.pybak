@@ -110,6 +110,7 @@ def makeEffects(sound):
   screech = smashSound(sound)
   effects["screech"] = screech
   return effects
+
 #smashSound condenses a sound into 1/4th of its normal time.
 def smashSound(sound):
   numSamples = len(getSamples(sound))
@@ -121,6 +122,7 @@ def smashSound(sound):
         setSampleValueAt(screech, offset, getSampleValueAt(sound, i))
         offset += 1
   return screech
+
 def printRequestSound(): # prints a request for a sound file from the user.
   global level
   request = ""
@@ -138,6 +140,7 @@ def printRequestSound(): # prints a request for a sound file from the user.
     printNow(request)
   except:
     print request
+
 def printInitializeSound(): # prints a request for the user to wait while sounds initialize.
   global level
   initialize = ""
@@ -159,13 +162,10 @@ def initializeSounds(): #initializes the various sounds used in this program.
   endLevelSong = makeSong(endLevelNotes)
   effects = makeEffects(sound)
 
-beginLevelSong = 0
+beginLevelSong = 0 # initialize values for globals
 endLevelSong = 0
 effects = 0
-initializeSounds()
-printNow(" ")
-
-courseLength = 0 # initialize values for globals
+courseLength = 0
 paces = 0
 initialTime = 0
 gravityInterval = 0
@@ -176,6 +176,7 @@ alive = True
 skyCounter = 0
 delay = .1
 sky = []
+playAgain = True
 
 def skyLine(rocks): # returns a line to add to the sky, adding rocks if needed
   line = ""
@@ -415,26 +416,34 @@ def circulate(): # creates a thread to display game; alternates the man's runnin
       printMan(25, running)
       sleep(delay)
 
-printTitle()
-pauseScreen()
+initializeSounds() # starts the game
 
-while alive: # runs the game while user is alive
-  if paces < courseLength:
-    printMan(25, running)
-    circulate()
-  else:
-    initializeSky()
-    level += 1
-    if level > 10:
-      printSuccess()
-      break
-    courseLength = 100 + (level * 15)
-    gravityInterval = 22 - (level * 2)
+while playAgain: # loops the game until user decides not to play again
+  printTitle()
+  pauseScreen()
+  while alive: # runs the game while user is alive
+    if paces < courseLength:
+      printMan(25, running)
+      circulate()
+    else:
+      initializeSky()
+      level += 1
+      if level > 10:
+        printSuccess()
+        break
+      courseLength = 100 + (level * 15)
+      gravityInterval = 22 - (level * 2)
+      paces = 0
+      running = False
+      initialTime = 10
+      printLevel(level)
+      pauseScreen()
+  if not alive: # prints failure screen when user is hit by a rock
+    printFailure()
+  if "y" in str(raw_input("Play again? ")).lower():
+    alive = True
+    level = 0
     paces = 0
-    running = False
-    initialTime = 10
-    printLevel(level)
-    pauseScreen()
-
-if not alive: # prints failure screen when user is hit by a rock
-  printFailure()
+    courseLength = 0
+  else:
+    playAgain = False
