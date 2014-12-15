@@ -124,7 +124,6 @@ def smashSound(sound):
   return screech
 
 def printRequestSound(): # prints a request for a sound file from the user.
-  global level
   request = ""
   for space in range(50):
     request += "\n"
@@ -132,7 +131,7 @@ def printRequestSound(): # prints a request for a sound file from the user.
     request += "*"
   request += "\n\n                            F R A N T I C    R U N N I N G    M A N\n\n\n"
   request += "To run this game, a sound bit of you saying hello is needed. Please\n"
-  request += "select a sound file when prompted.\n\n"
+  request += "select a sound file when prompted.\n\n\n"
   request += "                                       Please enjoy the game!\n\n"
   for space in range(76):
     request += "*"
@@ -142,28 +141,39 @@ def printRequestSound(): # prints a request for a sound file from the user.
     print request
 
 def printInitializeSound(): # prints a request for the user to wait while sounds initialize.
-  global level
   initialize = ""
   for space in range(50):
     initialize += "\n"
-  initialize += "Initializing sound, please wait..."
-  printNow(initialize)
+  for space in range(76):
+    initialize += "*"
+  initialize += "\n\n                            F R A N T I C    R U N N I N G    M A N\n\n\n\n\n\n\n"
+  initialize += "                                 Initializing sound, please wait...\n\n"
+  for space in range(76):
+    initialize += "*"
+  try:
+    printNow(initialize)
+  except:
+    print initialize
 
 def initializeSounds(): #initializes the various sounds used in this program.
   global effects
   global beginLevelSong
   global endLevelSong
+  global endGameSong
   printRequestSound()
   sound = makeSound(pickAFile())
   printInitializeSound()
-  beginLevelNotes = ['d', .37, 'e', .37, 'g', .37, 's', .01, 'd',.37, 's', .01, 'd', .37, 'a', .20, 'd', .20, 'g',.37, 'f',.37, 'e',.37, 'd',.37, 'g', .75]
-  endLevelNotes = beginLevelNotes + ['s', .01, 'g', .37, 's', .01, 'g', .37, 'b', .37, 'c', .75]
+  beginLevelNotes = ['d', .37, 'e', .37, 'g', .37, 'd', .37, 'a', .20, 'd', .20, 'g',.37, 'f',.37, 'e',.37, 'd',.37, 'g', .75]
+  endLevelNotes = ['s', .01, 'g', .2, 'b', .37, 'c', .37, 'd2', .75]
+  endGameNotes = beginLevelNotes + endLevelNotes
   beginLevelSong = makeSong(beginLevelNotes)
   endLevelSong = makeSong(endLevelNotes)
+  endGameSong = makeSong(endGameNotes)
   effects = makeEffects(sound)
 
 beginLevelSong = 0 # initialize values for globals
 endLevelSong = 0
+endGameSong = 0
 effects = 0
 courseLength = 0
 paces = 0
@@ -178,6 +188,7 @@ delay = .1
 sky = []
 playAgain = True
 lives = 3
+freakOut = False
 
 def skyLine(rocks): # returns a line to add to the sky, adding rocks if needed
   line = ""
@@ -233,12 +244,14 @@ def moveSkyDown(): # removes the bottom line, adds top line, tests alive status
   global gravityInterval
   global initialTime
   global alive
+  global effects
   if paces <= courseLength - 20 or initialTime > 0: # don't move sky down if safety is in sight
     if skyCounter >= gravityInterval:
       skyCounter = 0
       for character in sky[len(sky) - 1][26:30]:
         if not character == " ":
           alive = False
+          play(effects["drawn"])
       sky.pop()
       sky.insert(0, skyLine(True))
       if paces < 20:
@@ -249,6 +262,7 @@ def moveSkyDown(): # removes the bottom line, adds top line, tests alive status
 def moveSkyOver(sky): # moves the sky over to simulate running, clears sky if structure appears
   global paces
   global courseLength
+  global endLevelSong
   for line in range(len(sky)):
     newLine = sky[line][2:]
     if paces > courseLength - 20: # clear sky and build roof if safety is in sight
@@ -258,6 +272,7 @@ def moveSkyOver(sky): # moves the sky over to simulate running, clears sky if st
           newLine += "__"
         else:
           newLine += "\\_"
+          play(endLevelSong)
       else:
         newLine += "  "
     else: # otherwise, remove left spaces and add right spaces with random rocks
@@ -272,6 +287,8 @@ def printMan(margin, running): # prints man and sky, dropping rocks & moving the
   global sky
   global paces
   global initialTime
+  global effects
+  global freakOut
   runningLegs = ["/ \\", " | ", "/| "]
   legs = "/ \\"
   moveSkyDown()
@@ -291,12 +308,21 @@ def printMan(margin, running): # prints man and sky, dropping rocks & moving the
   line = ""
   for space in range(margin):
     line += " "
-  head = " @ "
-  body = "/|\\"
+  rock = False
   for character in sky[len(sky) - 1][26:30]:
     if not character == " ":
-      head = "\\!/"
-      body = " | "
+      rock = True
+  if rock:
+    if not freakOut:
+      freakOut = True
+      play(effects["screech"])
+    head = "\\!/"
+    body = " | "
+  else:
+    if freakOut:
+      freakOut = False
+    head = " @ "
+    body = "/|\\"
   man += line + head + "\n"
   man += line + body + "\n"
   man += line + legs + "\n"
@@ -305,8 +331,9 @@ def printMan(margin, running): # prints man and sky, dropping rocks & moving the
   except:
     print man
 
-def printLevel(number): # prints the level screen
+def printLevel(number, sound): # prints the level screen
   global lives
+  global beginLevelSong
   level = ""
   for space in range(50):
     level += "\n"
@@ -319,9 +346,11 @@ def printLevel(number): # prints the level screen
   for space in range(50):
     level += " "
   level += "Lives: " + str(lives) + "\n\n"
-  level += "                                         Press Return to start.\n\n\n"
+  level += "                                         Press Return to start.\n\n\n\n"
   for space in range(76):
     level += "*"
+  if sound:
+    play(beginLevelSong)
   try:
     printNow(level)
   except:
@@ -331,7 +360,7 @@ def printTitle(): # prints the title screen
   title = ""
   for space in range(50):
     title += "\n"
-  for space in range(75):
+  for space in range(76):
     title += "*"
   title += "\n                            F R A N T I C    R U N N I N G    M A N\n\n"
   title += "Welcome to Frantic Running Man, the real time console game made for JES.\n"
@@ -341,7 +370,7 @@ def printTitle(): # prints the title screen
   title += "structure to the next until you reach the device in the building at level 10.\n"
   title += "Press Return to run or stop and watch your head! Good luck, unwilling runner!\n\n"
   title += "                                         Press Return to start.\n"
-  for space in range(75):
+  for space in range(76):
     title += "*"
   try:
     printNow(title)
@@ -407,16 +436,23 @@ def circulate(): # creates a thread to display game; alternates the man's runnin
   global paces
   global alive
   global delay
+  global effects
+  global courseLength
   list = []
   thread.start_new_thread(inputThread, (list,))
   while paces < courseLength and alive:
     if list:
-      printMan(25, running)
-      if running:
-        running = False
+      if paces > courseLength - 21:
+        printMan(25, True)
       else:
-        running = True
-      break
+        printMan(25, running)
+        if running:
+          running = False
+          play(effects["o"])
+        else:
+          running = True
+          play(effects["he"])
+        break
     else:
       printMan(25, running)
       sleep(delay)
@@ -427,6 +463,10 @@ while playAgain: # loops the game until user decides not to play again
   printTitle()
   pauseScreen()
   lives = 3
+  alive = True
+  level = 0
+  paces = 0
+  courseLength = 0
   while alive: # runs the game while user is alive
     if paces < courseLength:
       printMan(25, running)
@@ -442,24 +482,21 @@ while playAgain: # loops the game until user decides not to play again
       paces = 0
       running = False
       initialTime = 10
-      printLevel(level)
+      printLevel(level, True)
       pauseScreen()
     if not alive: # prints failure screen when user is hit by a rock
+      blockingPlay(effects["drawn"])
       if lives <= 1:
         printFailure()
       else:
         lives -= 1
         alive = True
-        printLevel(level)
+        running = False
+        printLevel(level, False)
         pauseScreen()
         sky = clearSky(sky)
   response = ""
   while not "y" in response and not "n" in response:
     response = str(raw_input("Play again (yes or no)? ")).lower()
-  if "y" in response:
-    alive = True
-    level = 0
-    paces = 0
-    courseLength = 0
-  else:
+  if not "y" in response:
     playAgain = False
