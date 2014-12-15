@@ -177,6 +177,7 @@ skyCounter = 0
 delay = .1
 sky = []
 playAgain = True
+lives = 3
 
 def skyLine(rocks): # returns a line to add to the sky, adding rocks if needed
   line = ""
@@ -305,16 +306,20 @@ def printMan(margin, running): # prints man and sky, dropping rocks & moving the
     print man
 
 def printLevel(number): # prints the level screen
+  global lives
   level = ""
   for space in range(50):
     level += "\n"
   for space in range(76):
     level += "*"
-  level += "\n\n\n\n"
+  level += "\n\n\n"
   for space in range(47):
     level += " "
-  level += "L E V E L   " + str(number) + "\n\n\n"
-  level += "                                         Press Return to start.\n\n\n\n"
+  level += "L E V E L   " + str(number) + "\n\n"
+  for space in range(50):
+    level += " "
+  level += "Lives: " + str(lives) + "\n\n"
+  level += "                                         Press Return to start.\n\n\n"
   for space in range(76):
     level += "*"
   try:
@@ -421,6 +426,7 @@ initializeSounds() # starts the game
 while playAgain: # loops the game until user decides not to play again
   printTitle()
   pauseScreen()
+  lives = 3
   while alive: # runs the game while user is alive
     if paces < courseLength:
       printMan(25, running)
@@ -438,9 +444,19 @@ while playAgain: # loops the game until user decides not to play again
       initialTime = 10
       printLevel(level)
       pauseScreen()
-  if not alive: # prints failure screen when user is hit by a rock
-    printFailure()
-  if "y" in str(raw_input("Play again? ")).lower():
+    if not alive: # prints failure screen when user is hit by a rock
+      if lives <= 1:
+        printFailure()
+      else:
+        lives -= 1
+        alive = True
+        printLevel(level)
+        pauseScreen()
+        sky = clearSky(sky)
+  response = ""
+  while not "y" in response and not "n" in response:
+    response = str(raw_input("Play again (yes or no)? ")).lower()
+  if "y" in response:
     alive = True
     level = 0
     paces = 0
