@@ -14,25 +14,41 @@ def getHighestValue(sound):
 def isolateSound(sound):
   soundSamples = getSamples(sound)
   silenceThreshold = int((getHighestValue(sound) * 0.20))
+  consecutiveSamples = 30 #The number of consecutive samples that need to break the silence threshold.
   #First, find where the sound starts on the left side.
   firstValue = 0
+  count = 0
   for i in range(0, len(soundSamples)):
     value = getSampleValueAt(sound, i)
     if abs(value) > silenceThreshold:
-      firstValue = i
+      count = count + 1
+    if count > consecutiveSamples:
+      firstValue = i - count
       break
   #Next, find the last value.
   lastValue = 0
+  count = 0
   for i in range(len(soundSamples)-1, 0, -1):
     value = getSampleValueAt(sound, i)
     if abs(value) > silenceThreshold:
-      lastValue = i
+      count = count + 1
+    if count > consecutiveSamples:
+      lastValue = i + count - 1
       break
   #Now, make the new isolated sound.
   samplingRate = getSamplingRate(sound)
   newSound = makeEmptySound(lastValue-firstValue, int(getSamplingRate(sound)))
   for i in range(firstValue, lastValue):
     setSampleValueAt(newSound, i-firstValue, getSampleValueAt(sound, i))
+  #Now, make sure that the sound is only a second long.
+  numSamples = len(getSamples(newSound))
+  if numSamples > int(getSamplingRate(newSound)):
+    samplingRate = int(getSamplingRate(newSound))
+    shortenedSound = makeEmptySound(samplingRate, samplingRate)
+    for i in range(0, samplingRate):
+      setSampleValueAt(shortenedSound, i, getSampleValueAt(newSound, i))
+    newSound = shortenedSound
+    explore(newSound)
   return newSound
 def makeDrawnOut(sound, start, end, mult):
   offset = 0
