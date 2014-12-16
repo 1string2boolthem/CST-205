@@ -19,6 +19,25 @@ def mostCommonWord(wordDict):
       word = key
       count = wordDict[key]
   return word
+  
+def getModifier(frequency): #returns the modifying html based on the frequency of a word
+  size = 7 + int(frequency/10)
+  modifier = "<span style=\"font-size:" + str(size) + "pt "
+  if frequency == 1:
+    modifier += "color:LightGreen"
+  elif frequency < 10:
+    modifier += "color:green>"
+  elif frequency < 30:
+    modifier += "color:purple>"
+  elif frequency < 50:
+    modifier += "color:blue>"
+  elif frequency < 70:
+    modifier += "color:orange; font-weight:bold>"
+  elif frequency == 84:
+    modifier += "color:DarkRed; font-weight:bold>"
+  else:
+    modifier += "color:red; font-weight:bold>"
+  return modifier
 #greenEggs reads the eggs.txt file input by the user, creates a dictionary with each unique word as a key
 #and the key's value as the number of times that word occurs in the text. It also prints various
 #information to an html document, as per specifications.
@@ -26,6 +45,7 @@ def greenEggs():
   printNow("Provide eggs.txt.")
   file = open(pickAFile(), "rt")
   data =  file.read()
+  fileData = data
   file.close()
   data = data.replace('\n', ' ')
   data = data.replace('-', ' ')
@@ -43,7 +63,23 @@ def greenEggs():
   content += "Number of words in \"Green Eggs & Ham\": " + str(wordCount(wordDict)) + "<br />"
   content += "Number of unique words in \"Green Eggs & Ham\": " + str(len(wordDict)) + "<br />"
   content += "The most common word in \"Green Eggs & Ham\": " + mostCommonWord(wordDict) + "<br />"
-  content += "Now, for a visual representation: <br />"
+  content += "Now, for a visual representation: <br /><br />"
+  data = fileData
+  data = data.replace('\n', "<br>")
+  data = data.replace('-', ' ')
+  data = re.sub(' +', ' ', data)
+  words = data.replace("<br>", " <br> ")
+  words = words.split(' ')
+  wordList = []
+  data = ""
+  for word in range(len(words)):
+    if words[word] != "<br>" and words[word] != '':
+      frequency = wordDict[words[word].lower()]
+      modifier = getModifier(frequency)
+      data += modifier + words[word] + "</span> "
+    else:
+      data += "<br>"
+  content += data
   makePage(content)
 
 #makePage writes content to a user-supplied html page.
